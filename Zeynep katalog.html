@@ -1,0 +1,524 @@
+<!DOCTYPE html>
+<html lang="tr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>İnteraktif Ayakkabı Katalogu</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Arial', sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            padding: 20px;
+        }
+
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+        }
+
+        .header {
+            text-align: center;
+            color: white;
+            margin-bottom: 40px;
+        }
+
+        .header h1 {
+            font-size: 3rem;
+            margin-bottom: 10px;
+            text-shadow: 2px 2px 4px rgba(0,0,0,0.3);
+        }
+
+        .header p {
+            font-size: 1.2rem;
+            opacity: 0.9;
+        }
+
+        .catalog-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(350px, 1fr));
+            gap: 30px;
+            margin-bottom: 40px;
+        }
+
+        .product-card {
+            background: rgba(255, 255, 255, 0.95);
+            border-radius: 20px;
+            padding: 25px;
+            box-shadow: 0 15px 35px rgba(0,0,0,0.1);
+            backdrop-filter: blur(10px);
+            border: 1px solid rgba(255,255,255,0.2);
+            transition: all 0.3s ease;
+        }
+
+        .product-card:hover {
+            transform: translateY(-10px);
+            box-shadow: 0 25px 50px rgba(0,0,0,0.2);
+        }
+
+        .product-image {
+            width: 100%;
+            height: 200px;
+            object-fit: cover;
+            border-radius: 15px;
+            margin-bottom: 20px;
+            transition: all 0.3s ease;
+        }
+
+        .product-info {
+            margin-bottom: 20px;
+        }
+
+        .product-title {
+            font-size: 1.5rem;
+            font-weight: bold;
+            color: #333;
+            margin-bottom: 10px;
+        }
+
+        .product-description {
+            color: #666;
+            line-height: 1.6;
+            margin-bottom: 15px;
+        }
+
+        .product-price {
+            font-size: 1.3rem;
+            font-weight: bold;
+            color: #e74c3c;
+            margin-bottom: 20px;
+        }
+
+        .color-section {
+            border-top: 1px solid #eee;
+            padding-top: 20px;
+        }
+
+        .color-label {
+            font-weight: bold;
+            color: #333;
+            margin-bottom: 15px;
+            font-size: 1.1rem;
+        }
+
+        .color-buttons {
+            display: flex;
+            gap: 10px;
+            flex-wrap: wrap;
+        }
+
+        .color-btn {
+            width: 40px;
+            height: 40px;
+            border-radius: 50%;
+            border: 3px solid #fff;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            box-shadow: 0 3px 10px rgba(0,0,0,0.2);
+            position: relative;
+        }
+
+        .color-btn:hover {
+            transform: scale(1.2);
+            box-shadow: 0 5px 15px rgba(0,0,0,0.3);
+        }
+
+        .color-btn.active {
+            border-color: #333;
+            transform: scale(1.1);
+        }
+
+        .color-btn::after {
+            content: attr(data-color);
+            position: absolute;
+            bottom: -25px;
+            left: 50%;
+            transform: translateX(-50%);
+            font-size: 0.8rem;
+            color: #666;
+            white-space: nowrap;
+            opacity: 0;
+            transition: opacity 0.3s ease;
+        }
+
+        .color-btn:hover::after {
+            opacity: 1;
+        }
+
+        /* Modal Styles */
+        .modal {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0,0,0,0.9);
+            z-index: 1000;
+            overflow-y: auto;
+        }
+
+        .modal.active {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            padding: 20px;
+        }
+
+        .modal-content {
+            background: white;
+            border-radius: 20px;
+            max-width: 800px;
+            width: 100%;
+            max-height: 90vh;
+            overflow-y: auto;
+            position: relative;
+        }
+
+        .modal-header {
+            padding: 30px 30px 20px;
+            border-bottom: 1px solid #eee;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .modal-title {
+            font-size: 1.8rem;
+            font-weight: bold;
+            color: #333;
+        }
+
+        .close-btn {
+            background: #ff4757;
+            color: white;
+            border: none;
+            width: 40px;
+            height: 40px;
+            border-radius: 50%;
+            cursor: pointer;
+            font-size: 1.5rem;
+            transition: all 0.3s ease;
+        }
+
+        .close-btn:hover {
+            background: #ff3742;
+            transform: scale(1.1);
+        }
+
+        .modal-gallery {
+            padding: 30px;
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 20px;
+        }
+
+        .modal-image {
+            width: 100%;
+            height: 200px;
+            object-fit: cover;
+            border-radius: 15px;
+            transition: all 0.3s ease;
+            cursor: pointer;
+        }
+
+        .modal-image:hover {
+            transform: scale(1.05);
+            box-shadow: 0 10px 25px rgba(0,0,0,0.2);
+        }
+
+        .pagination {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            gap: 10px;
+            margin-top: 40px;
+        }
+
+        .page-btn {
+            padding: 10px 15px;
+            background: rgba(255,255,255,0.2);
+            color: white;
+            border: none;
+            border-radius: 8px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+
+        .page-btn:hover, .page-btn.active {
+            background: rgba(255,255,255,0.3);
+            transform: translateY(-2px);
+        }
+
+        @media (max-width: 768px) {
+            .header h1 {
+                font-size: 2rem;
+            }
+            
+            .catalog-grid {
+                grid-template-columns: 1fr;
+                gap: 20px;
+            }
+            
+            .product-card {
+                padding: 20px;
+            }
+            
+            .modal-content {
+                margin: 10px;
+            }
+            
+            .modal-gallery {
+                grid-template-columns: 1fr;
+                padding: 20px;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <h1>🥿 Ayakkabı Koleksiyonu</h1>
+            <p>Premium kalitede 400+ farklı model ayakkabı</p>
+        </div>
+
+        <div class="catalog-grid" id="catalog">
+            <!-- Products will be dynamically loaded here -->
+        </div>
+
+        <div class="pagination" id="pagination">
+            <!-- Pagination will be dynamically loaded here -->
+        </div>
+    </div>
+
+    <!-- Modal for color gallery -->
+    <div class="modal" id="colorModal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h2 class="modal-title" id="modalTitle"></h2>
+                <button class="close-btn" onclick="closeModal()">&times;</button>
+            </div>
+            <div class="modal-gallery" id="modalGallery">
+                <!-- Gallery images will be loaded here -->
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // Sample data - Bu gerçek projede veritabanından gelecek
+        const shoesData = [
+            {
+                id: 1,
+                name: "Classic Oxford",
+                description: "Klasik iş hayatı için mükemmel oxford ayakkabı. Premium deri ve rahat taban yapısı.",
+                price: "₺899",
+                image: "https://images.pexels.com/photos/2529148/pexels-photo-2529148.jpeg?auto=compress&cs=tinysrgb&w=400",
+                colors: [
+                    { name: "Siyah", code: "#000000", images: [
+                        "https://images.pexels.com/photos/2529148/pexels-photo-2529148.jpeg?auto=compress&cs=tinysrgb&w=400",
+                        "https://images.pexels.com/photos/1598505/pexels-photo-1598505.jpeg?auto=compress&cs=tinysrgb&w=400",
+                        "https://images.pexels.com/photos/2562327/pexels-photo-2562327.jpeg?auto=compress&cs=tinysrgb&w=400"
+                    ]},
+                    { name: "Kahverengi", code: "#8B4513", images: [
+                        "https://images.pexels.com/photos/1476209/pexels-photo-1476209.jpeg?auto=compress&cs=tinysrgb&w=400",
+                        "https://images.pexels.com/photos/2562327/pexels-photo-2562327.jpeg?auto=compress&cs=tinysrgb&w=400"
+                    ]},
+                    { name: "Lacivert", code: "#000080", images: [
+                        "https://images.pexels.com/photos/1598508/pexels-photo-1598508.jpeg?auto=compress&cs=tinysrgb&w=400"
+                    ]}
+                ]
+            },
+            {
+                id: 2,
+                name: "Sport Runner",
+                description: "Koşu ve spor aktiviteleri için tasarlanmış hafif ve esnek yapıya sahip ayakkabı.",
+                price: "₺649",
+                image: "https://images.pexels.com/photos/1598508/pexels-photo-1598508.jpeg?auto=compress&cs=tinysrgb&w=400",
+                colors: [
+                    { name: "Beyaz", code: "#FFFFFF", images: [
+                        "https://images.pexels.com/photos/1598508/pexels-photo-1598508.jpeg?auto=compress&cs=tinysrgb&w=400",
+                        "https://images.pexels.com/photos/2562327/pexels-photo-2562327.jpeg?auto=compress&cs=tinysrgb&w=400"
+                    ]},
+                    { name: "Mavi", code: "#0066CC", images: [
+                        "https://images.pexels.com/photos/1476209/pexels-photo-1476209.jpeg?auto=compress&cs=tinysrgb&w=400"
+                    ]},
+                    { name: "Gri", code: "#808080", images: [
+                        "https://images.pexels.com/photos/1598505/pexels-photo-1598505.jpeg?auto=compress&cs=tinysrgb&w=400"
+                    ]},
+                    { name: "Kırmızı", code: "#FF0000", images: [
+                        "https://images.pexels.com/photos/2529148/pexels-photo-2529148.jpeg?auto=compress&cs=tinysrgb&w=400"
+                    ]}
+                ]
+            },
+            {
+                id: 3,
+                name: "Casual Loafer",
+                description: "Günlük kullanım için şık ve rahat loafer ayakkabı. Yumuşak deri astarı.",
+                price: "₺759",
+                image: "https://images.pexels.com/photos/1476209/pexels-photo-1476209.jpeg?auto=compress&cs=tinysrgb&w=400",
+                colors: [
+                    { name: "Taba", code: "#D2691E", images: [
+                        "https://images.pexels.com/photos/1476209/pexels-photo-1476209.jpeg?auto=compress&cs=tinysrgb&w=400",
+                        "https://images.pexels.com/photos/2562327/pexels-photo-2562327.jpeg?auto=compress&cs=tinysrgb&w=400"
+                    ]},
+                    { name: "Siyah", code: "#000000", images: [
+                        "https://images.pexels.com/photos/2529148/pexels-photo-2529148.jpeg?auto=compress&cs=tinysrgb&w=400"
+                    ]},
+                    { name: "Beyaz", code: "#FFFFFF", images: [
+                        "https://images.pexels.com/photos/1598508/pexels-photo-1598508.jpeg?auto=compress&cs=tinysrgb&w=400"
+                    ]}
+                ]
+            },
+            {
+                id: 4,
+                name: "Winter Boot",
+                description: "Kış ayları için su geçirmez ve sıcak tutma özelliğine sahip bot.",
+                price: "₺1299",
+                image: "https://images.pexels.com/photos/1598505/pexels-photo-1598505.jpeg?auto=compress&cs=tinysrgb&w=400",
+                colors: [
+                    { name: "Siyah", code: "#000000", images: [
+                        "https://images.pexels.com/photos/1598505/pexels-photo-1598505.jpeg?auto=compress&cs=tinysrgb&w=400",
+                        "https://images.pexels.com/photos/2529148/pexels-photo-2529148.jpeg?auto=compress&cs=tinysrgb&w=400"
+                    ]},
+                    { name: "Kahverengi", code: "#8B4513", images: [
+                        "https://images.pexels.com/photos/1476209/pexels-photo-1476209.jpeg?auto=compress&cs=tinysrgb&w=400"
+                    ]},
+                    { name: "Gri", code: "#696969", images: [
+                        "https://images.pexels.com/photos/2562327/pexels-photo-2562327.jpeg?auto=compress&cs=tinysrgb&w=400"
+                    ]},
+                    { name: "Lacivert", code: "#191970", images: [
+                        "https://images.pexels.com/photos/1598508/pexels-photo-1598508.jpeg?auto=compress&cs=tinysrgb&w=400"
+                    ]}
+                ]
+            }
+        ];
+
+        let currentPage = 1;
+        const itemsPerPage = 6;
+        let totalPages = Math.ceil(shoesData.length / itemsPerPage);
+
+        function renderProducts(page = 1) {
+            const startIndex = (page - 1) * itemsPerPage;
+            const endIndex = startIndex + itemsPerPage;
+            const pageProducts = shoesData.slice(startIndex, endIndex);
+            
+            const catalog = document.getElementById('catalog');
+            catalog.innerHTML = '';
+            
+            pageProducts.forEach(product => {
+                const productCard = document.createElement('div');
+                productCard.className = 'product-card';
+                productCard.innerHTML = `
+                    <img src="${product.image}" alt="${product.name}" class="product-image">
+                    <div class="product-info">
+                        <h3 class="product-title">${product.name}</h3>
+                        <p class="product-description">${product.description}</p>
+                        <div class="product-price">${product.price}</div>
+                    </div>
+                    <div class="color-section">
+                        <div class="color-label">Renk Seçenekleri:</div>
+                        <div class="color-buttons">
+                            ${product.colors.map(color => `
+                                <div class="color-btn" 
+                                     style="background-color: ${color.code}" 
+                                     data-color="${color.name}"
+                                     onclick="openColorGallery(${product.id}, '${color.name}')">
+                                </div>
+                            `).join('')}
+                        </div>
+                    </div>
+                `;
+                catalog.appendChild(productCard);
+            });
+        }
+
+        function renderPagination() {
+            const pagination = document.getElementById('pagination');
+            pagination.innerHTML = '';
+            
+            // Previous button
+            if (currentPage > 1) {
+                const prevBtn = document.createElement('button');
+                prevBtn.className = 'page-btn';
+                prevBtn.textContent = '‹ Önceki';
+                prevBtn.onclick = () => goToPage(currentPage - 1);
+                pagination.appendChild(prevBtn);
+            }
+            
+            // Page numbers
+            for (let i = 1; i <= totalPages; i++) {
+                const pageBtn = document.createElement('button');
+                pageBtn.className = page-btn ${i === currentPage ? 'active' : ''};
+                pageBtn.textContent = i;
+                pageBtn.onclick = () => goToPage(i);
+                pagination.appendChild(pageBtn);
+            }
+            
+            // Next button
+            if (currentPage < totalPages) {
+                const nextBtn = document.createElement('button');
+                nextBtn.className = 'page-btn';
+                nextBtn.textContent = 'Sonraki ›';
+                nextBtn.onclick = () => goToPage(currentPage + 1);
+                pagination.appendChild(nextBtn);
+            }
+        }
+
+        function goToPage(page) {
+            currentPage = page;
+            renderProducts(page);
+            renderPagination();
+            window.scrollTo({ top: 0, behavior: 'smooth' });
+        }
+
+        function openColorGallery(productId, colorName) {
+            const product = shoesData.find(p => p.id === productId);
+            const color = product.colors.find(c => c.name === colorName);
+            
+            document.getElementById('modalTitle').textContent = ${product.name} - ${colorName};
+            
+            const gallery = document.getElementById('modalGallery');
+            gallery.innerHTML = '';
+            
+            color.images.forEach(imageSrc => {
+                const img = document.createElement('img');
+                img.src = imageSrc;
+                img.className = 'modal-image';
+                img.alt = ${product.name} ${colorName};
+                img.onclick = () => window.open(imageSrc, '_blank');
+                gallery.appendChild(img);
+            });
+            
+            document.getElementById('colorModal').classList.add('active');
+        }
+
+        function closeModal() {
+            document.getElementById('colorModal').classList.remove('active');
+        }
+
+        // Close modal when clicking outside
+        document.getElementById('colorModal').addEventListener('click', function(e) {
+            if (e.target === this) {
+                closeModal();
+            }
+        });
+
+        // Close modal with ESC key
+        document.addEventListener('keydown', function(e) {
+            if (e.key === 'Escape') {
+                closeModal();
+            }
+        });
+
+        // Initialize the catalog
+        renderProducts(1);
+        renderPagination();
+    </script>
+</body>
+</html>

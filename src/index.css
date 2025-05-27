@@ -1,0 +1,59 @@
+@import url('https://fonts.googleapis.com/css2?family=Poppins:wght@400;600;700&display=swap');
+
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+body {
+  font-family: 'Poppins', Arial, sans-serif;
+  background: linear-gradient(135deg, #fafdff 0%, #e6f0f6 100%);
+}
+
+/* Modern kart gölgeleri ve hover efektleri */
+.card-modern {
+  box-shadow: 0 8px 32px 0 rgba(59, 87, 107, 0.10);
+  border-radius: 1.5rem;
+  transition: transform 0.2s, box-shadow 0.2s;
+}
+.card-modern:hover {
+  transform: scale(1.04);
+  box-shadow: 0 16px 40px 0 rgba(59, 87, 107, 0.18);
+}
+
+/* Renkli yuvarlaklar için animasyon */
+.color-circle {
+  transition: box-shadow 0.2s, transform 0.2s;
+}
+.color-circle:hover {
+  box-shadow: 0 0 0 4px #7a944a;
+  transform: scale(1.15);
+}
+
+/* Navbar için gölge ve arka plan */
+.navbar-shadow {
+  box-shadow: 0 2px 12px 0 rgba(59, 87, 107, 0.08);
+  background: #fff;
+}
+
+/* Temaya uygun butonlar */
+.btn-main {
+  background: #3b576b;
+  color: #fff;
+  border-radius: 0.5rem;
+  transition: background 0.2s;
+}
+.btn-main:hover {
+  background: #7a944a;
+  color: #fff;
+}
+
+.btn-accent {
+  background: #7a944a;
+  color: #fff;
+  border-radius: 0.5rem;
+  transition: background 0.2s;
+}
+.btn-accent:hover {
+  background: #3b576b;
+  color: #fff;
+} 
